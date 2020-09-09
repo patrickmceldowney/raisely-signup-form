@@ -1,11 +1,44 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
-import LoaderButton from './LoaderButton';
+import Button from 'react-bootstrap/Button';
 import './Signup.css';
 import { Formik } from 'formik'
 import * as yup from 'yup';
 
+
+/**
+ * Create the promise for the custom yup validation
+ */
+yup.addMethod(yup.string, 'checkValidEmail', function (message) {
+  return this
+    .test({
+      name: 'checkValidEmail',
+      exclusive: true,
+      message: message || 'Must be a valid email', //expect an i18n message to be passed in
+      test: async function (value) {
+        const response = await fetch('https://api.raisely.com/v3/check-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            'campaignUuid': '46aa3270-d2ee-11ea-a9f0-e9a68ccff42a',
+            'data': {
+              'email': value,
+            }
+          })
+        });
+        const json = await response.json();
+        console.log(json.data.status);
+        return (json.data.status === 'OK') ? true : false;
+      }
+    })
+})
+/**
+ * Set up the schema for yup for validation, including a custom validation
+ * method to call the Raisely API to check for a valid email.
+ */
 const schema = yup.object().shape({
   firstName: yup.string()
     .min(2, 'First name must have at least 2 characters')
@@ -16,9 +49,8 @@ const schema = yup.object().shape({
     .max(100, 'Last name can be no longer than 100 characters')
     .required('Last name is required'),
   email: yup.string()
-    .email('Must be a valid email address')
-    .max(100, 'Email must be less than a 100 characters')
-    .required('Email is required'),
+    .required('Email is required')
+    .checkValidEmail('Must be a valid email address'),
   password: yup.string()
     .required('Password is required')
     .min(8, 'Password is too short - should be at least 8 characters')
@@ -34,6 +66,9 @@ const schema = yup.object().shape({
     })
 });
 
+/**
+ * Set the initial values of the form
+ */
 const initialValues = {
   firstName: '',
   lastName: '',
@@ -41,13 +76,55 @@ const initialValues = {
   password: '',
   confirmPassword: ''
 };
+
+/**
+ * Make an API call to the Raisely API to sign up a new user.
+ * Email validation has already taken place.
+ */
+async function signUpUser (values) {
+  let response = await fetch('https://api.raisely.com/v3/check-user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      'campaignUuid': '46aa3270-d2ee-11ea-a9f0-e9a68ccff42a',
+      'data': {
+        'firstName': values.firstName,
+        'lastName': values.lastName,
+        'email': values.email,
+        'password': values.password
+      }
+    })
+  });
+
+  let json = await response.json();
+  return json;
+}
+
+
+/**
+ * Form component function
+ */
 function Signup() {
   return (
     <Formik
       validationSchema={schema}
       initialValues={initialValues}
-      onSubmit={(values, { setSubmitting }) => {
-        alert(JSON.stringify(values, null, 2));
+      validateOnChange={false}
+      validateOnBlur={true}
+      onSubmit={async (values, { setSubmitting }) => {
+        setSubmitting(true);
+        signUpUser(values)
+          .then(function(json) {
+            console.log(json);
+            if(json.data.status === 'OK') {
+              window.location.pathname = '/welcome'
+            }
+          })
+          .catch(function(error) {
+            console.log('Request failed: ', error)
+          })
         setSubmitting(false);
       }}
     >
@@ -59,6 +136,7 @@ function Signup() {
         touched,
         isValid,
         errors,
+        isSubmitting
       }) => (
         <Form noValidate onSubmit={handleSubmit} className='Signup'>
           <Form.Row>
@@ -121,7 +199,7 @@ function Signup() {
               <Form.Control
                 type='password'
                 onChange={handleChange}
-                placeholder='confirm password'
+                placeholder='confirm'
                 value={values.confirmPassword}
                 isValid={touched.confirmPassword && !errors.confirmPassword}
                 isInvalid={!!errors.confirmPassword}
@@ -130,13 +208,12 @@ function Signup() {
               <Form.Control.Feedback type='invalid'>{errors.confirmPassword}</Form.Control.Feedback>
             </Form.Group>
           </Form.Row>
-          <LoaderButton
-            block
+          <Button
             type='submit'
-            bsSize='large'
+            disabled={isSubmitting}
           >
             Submit
-          </LoaderButton>
+          </Button>
         </Form>
       )}
     </Formik>
