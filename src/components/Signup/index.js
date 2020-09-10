@@ -157,6 +157,8 @@ function Signup() {
    * Set the state of the error dialog
    */
   const [open, setOpen] = React.useState(false);
+  const [successOpen, setSuccessOpen] = React.useState(false);
+  const [successMessage, setSuccessMessage] = React.useState('');
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -165,6 +167,18 @@ function Signup() {
   const handleClose = () => {
     setOpen(false);
   };
+
+   const handleSuccessClickOpen = () => {
+    setSuccessOpen(true);
+  };
+
+  const handleSuccessClose = () => {
+    setSuccessOpen(false);
+  };
+
+ const handleSuccessMessage = (message) => {
+   setSuccessMessage(message)
+ }
 
   return (
     <div className='Signup'>
@@ -182,9 +196,9 @@ function Signup() {
               values.email = '';
             } else if(json === 'OK') {
               signUpUser(values).then(res => {
-                console.log(res.message)
+                handleSuccessMessage(res.message);
+                handleSuccessClickOpen()
                 resetForm({})
-                window.location.pathname = '/welcome'
               })
               .catch((e) =>
                 console.log(e)
@@ -232,6 +246,21 @@ function Signup() {
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
             OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={successOpen}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleSuccessClose}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle id="alert-dialog-slide-title">{successMessage}</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleSuccessClose} color="secondary">
+            Dismiss
           </Button>
         </DialogActions>
       </Dialog>
