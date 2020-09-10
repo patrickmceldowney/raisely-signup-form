@@ -1,9 +1,16 @@
 import React from 'react';
-import './Signup.css';
 import { Formik, Form } from 'formik';
 import Button from '@material-ui/core/Button';
 import FormikField from '../FormikField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Slide from '@material-ui/core/Slide';
 import * as yup from 'yup';
+
+import './Signup.css';
 
 /**
  * Create the promise for the custom yup validation
@@ -83,7 +90,12 @@ const initialValues = {
   confirmPassword: ''
 };
 
+/* Sets the transition of the material UI dialog box */
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
+/* Fetch variables  */
 const checkUserUrl = 'https://api.raisely.com/v3/check-user'
 const signupUrl = 'https://api.raisely.com/v3/signup'
 const campaignUuid = '46aa3270-d2ee-11ea-a9f0-e9a68ccff42a'
@@ -140,6 +152,20 @@ async function signUpUser (values) {
  * Form component function
  */
 function Signup() {
+
+  /**
+   * Set the state of the error dialog
+   */
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <div className='Signup'>
       <h1>Signup Form</h1>
@@ -150,7 +176,7 @@ function Signup() {
         onSubmit={(values, {resetForm, setFieldValue}) => {
           checkUser(values.email).then(json => {
             if(json === 'EXISTS') {
-              alert('That email already exists!')
+              handleClickOpen();
               setFieldValue('email', '')
               setFieldValue('confirmPassword', '')
               values.email = '';
@@ -158,7 +184,7 @@ function Signup() {
               signUpUser(values).then(res => {
                 console.log(res.message)
                 resetForm({})
-                //window.location.pathname = '/welcome'
+                window.location.pathname = '/welcome'
               })
               .catch((e) =>
                 console.log(e)
@@ -188,6 +214,27 @@ function Signup() {
           </Form>
         )}
       </Formik>
+
+      <Dialog
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle id="alert-dialog-slide-title">{"That email has already been registered!"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            Please enter a new email and try again
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

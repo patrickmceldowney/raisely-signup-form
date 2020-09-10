@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowRight } from 'react-icons/fa'
+import { FaArrowLeft } from 'react-icons/fa'
 
 import './Welcome.css';
 
@@ -11,8 +11,8 @@ export default function Welcome() {
         <h3>Thanks for Joining!</h3>
       </div>
       <Link to='/' className='ReturnWrapper'>
+        <FaArrowLeft className='ReturnIcon' />
         <p className='ReturnText'>Return</p>
-        <FaArrowRight className='ReturnIcon' />
       </Link>
     </div>
 

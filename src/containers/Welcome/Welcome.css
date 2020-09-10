@@ -20,7 +20,7 @@
   grid-area: Return;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-areas: 'Text Icon';
+  grid-template-areas: 'Icon Text';
   align-items: center;
   transition: all .5s;
   color: #fff;
@@ -31,10 +31,11 @@
 }
 .ReturnWrapper .ReturnText {
   grid-area: Text;
-  justify-self: end;
+  justify-self: start;
   margin: 0;
 }
 .ReturnWrapper .ReturnIcon {
   grid-area: Icon;
-  margin-left: 15px
+  justify-self: end;
+  margin-right: 15px
 }
