@@ -1,0 +1,40 @@
+.Welcome {
+  text-align: center;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    'Message'
+    'Return';
+  align-items: center;
+}
+.WelcomeTitle {
+  background: #fff;
+  border-radius: 10px;
+  margin: 20px auto;
+  max-width: 500px;
+  padding: 50px;
+  color: #20222a;
+  text-align: center;
+}
+.ReturnWrapper {
+  grid-area: Return;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: 'Text Icon';
+  align-items: center;
+  transition: all .5s;
+  color: #fff;
+}
+.ReturnWrapper:hover {
+  color: #aa647b;
+  text-decoration: none;
+}
+.ReturnWrapper .ReturnText {
+  grid-area: Text;
+  justify-self: end;
+  margin: 0;
+}
+.ReturnWrapper .ReturnIcon {
+  grid-area: Icon;
+  margin-left: 15px
+}
